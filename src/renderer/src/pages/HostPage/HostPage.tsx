@@ -1,3 +1,4 @@
+import BackButton from '@renderer/components/BackButton';
 import Button from '@renderer/components/controls/Button';
 import Toggle from '@renderer/components/controls/Toggle';
 import Panel from '@renderer/components/Panel';
@@ -28,6 +29,8 @@ export default function HostPage() {
 
   return (
     <div className='flex justify-center items-center w-full flex-col gap-10 p-6 md:p-8'>
+      <BackButton />
+
       <div className='flex flex-col items-center justify-center gap-2'>
         <h1 className='text-xl text-center font-extrabold text-gray-900 dark:text-white'>Share my screen</h1>
 

@@ -1,3 +1,4 @@
+import BackButton from '@renderer/components/BackButton';
 import Toggle from '@renderer/components/controls/Toggle';
 import Panel from '@renderer/components/Panel';
 import ConnectForm from './content/ConnectForm';
@@ -22,7 +23,9 @@ export default function ViewerPage() {
   } = useViewerPageLogic();
 
   return (
-    <div className='mx-auto flex w-full max-w-4xl flex-col gap-5 p-6 md:p-8'>
+    <div className='flex w-full flex-col gap-5 p-6 md:p-8'>
+      <BackButton />
+
       <div>
         <h1 className='text-xl font-extrabold text-gray-900 dark:text-white'>Connect to a screen</h1>
 

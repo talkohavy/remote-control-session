@@ -20,6 +20,7 @@ export class AnnotationOverlayController {
     this.strokePoint();
     this.strokeEnd();
     this.clear();
+    this.getDisplayOffset();
   }
 
   private setActiveDisplay() {
@@ -53,5 +54,10 @@ export class AnnotationOverlayController {
 
   private clear() {
     this.bridge.on(ApiEvents.AnnotationClear, () => this.annotationOverlayService.clear());
+  }
+
+  /** Pulled by the overlay page on its own mount - see `AnnotationOverlayService.getDisplayOffset`. */
+  private getDisplayOffset() {
+    this.bridge.handle(ApiEvents.AnnotationGetDisplayOffset, () => this.annotationOverlayService.getDisplayOffset());
   }
 }

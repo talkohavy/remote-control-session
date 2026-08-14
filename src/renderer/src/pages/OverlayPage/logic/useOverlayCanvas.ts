@@ -72,14 +72,6 @@ export function useOverlayCanvas(canvasRef: React.RefObject<HTMLCanvasElement | 
 
       const { x, y } = toPixels(payload.x, payload.y);
 
-      // eslint-disable-next-line no-console
-      console.log('[overlay] startStroke', {
-        normalized: { x: payload.x, y: payload.y },
-        pixel: { x, y },
-        offset: displayOffsetRef.current,
-        canvas: canvasRef.current ? { width: canvasRef.current.width, height: canvasRef.current.height } : null,
-      });
-
       strokesRef.current.set(payload.strokeId, { style: payload.style, lastX: x, lastY: y });
 
       // A dot so a click without dragging still leaves a visible mark.

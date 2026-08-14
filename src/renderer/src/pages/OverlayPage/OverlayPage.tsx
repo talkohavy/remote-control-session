@@ -6,7 +6,6 @@ import type {
   AnnotationStrokeEndPayload,
   AnnotationStrokePointPayload,
   AnnotationStrokeStartPayload,
-  DisplayOffset,
 } from '@root/common/types';
 
 /**
@@ -38,6 +37,11 @@ export default function OverlayPage(): React.JSX.Element {
     document.getElementById('root')?.style.setProperty('background', 'transparent');
   }, []);
 
+  // See `AnnotationOverlayService.getDisplayOffset` for why this is pulled, not pushed.
+  useEffect(() => {
+    ipcClient.annotation.getDisplayOffset().then(setDisplayOffset);
+  }, [setDisplayOffset]);
+
   useIpcIncomingEvent(ipcClient.annotation.onStrokeStart, (payload: AnnotationStrokeStartPayload) =>
     startStroke(payload),
   );
@@ -46,7 +50,6 @@ export default function OverlayPage(): React.JSX.Element {
   );
   useIpcIncomingEvent(ipcClient.annotation.onStrokeEnd, (payload: AnnotationStrokeEndPayload) => endStroke(payload));
   useIpcIncomingEvent(ipcClient.annotation.onClear, () => clear());
-  useIpcIncomingEvent(ipcClient.annotation.onDisplayOffset, (offset: DisplayOffset) => setDisplayOffset(offset));
 
   return <canvas ref={canvasRef} className='fixed inset-0 size-full' />;
 }

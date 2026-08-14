@@ -39,25 +39,12 @@ export class AnnotationOverlayService {
     this.activeDisplayBounds = display.bounds;
     window.setBounds(display.bounds);
 
-    console.log('[main] setActiveDisplay', {
-      requestedDisplayId: displayId,
-      resolvedDisplay: { id: display.id, bounds: display.bounds, scaleFactor: display.scaleFactor },
-      windowBoundsAfterSet: window.getBounds(),
-    });
-
-    if (window.isVisible()) {
-      this.pushDisplayOffset(window);
-      return;
-    }
+    if (window.isVisible()) return;
 
     if (window.webContents.isLoading()) {
-      window.once('ready-to-show', () => {
-        window.showInactive();
-        this.pushDisplayOffset(window);
-      });
+      window.once('ready-to-show', () => window.showInactive());
     } else {
       window.showInactive();
-      this.pushDisplayOffset(window);
     }
   }
 
@@ -101,22 +88,31 @@ export class AnnotationOverlayService {
 
   /**
    * Reads back where the OS actually placed the window - which on macOS can differ from the
-   * `setBounds` request, since this window's level sits below the menu bar's - and pushes the
-   * discrepancy so `useOverlayCanvas` can shift every point back onto the true display bounds.
+   * `setBounds` request, since this window's level sits below the menu bar's, and the clamp
+   * only takes effect once the window is actually shown, not at `setBounds` time.
+   *
+   * Deliberately pulled by the overlay page on its own mount rather than pushed from here: a
+   * push has no way to know the renderer's IPC listener is attached yet (native
+   * `ready-to-show` can fire before React finishes mounting), so it can race and silently
+   * deliver a stale `{0, 0}`. Waiting for `'show'` here, rather than trusting whatever
+   * `getBounds` says right now, closes that race from the other end too: if this is called
+   * before the window is actually on screen, the clamp has not happened yet either.
    */
-  private pushDisplayOffset(window: BrowserWindow): void {
-    if (!this.activeDisplayBounds) return;
+  getDisplayOffset(): Promise<DisplayOffset> {
+    const window = this.overlayWindow;
+    const displayBounds = this.activeDisplayBounds;
 
-    const actual = window.getBounds();
+    if (!window || !displayBounds) return Promise.resolve({ x: 0, y: 0 });
 
-    const offset: DisplayOffset = {
-      x: actual.x - this.activeDisplayBounds.x,
-      y: actual.y - this.activeDisplayBounds.y,
+    const compute = (): DisplayOffset => {
+      const actual = window.getBounds();
+
+      return { x: actual.x - displayBounds.x, y: actual.y - displayBounds.y };
     };
 
-    console.log('[main] pushDisplayOffset', { actual, activeDisplayBounds: this.activeDisplayBounds, offset });
+    if (window.isVisible()) return Promise.resolve(compute());
 
-    this.bridge.emit(window, ApiEvents.AnnotationDisplayOffset, offset);
+    return new Promise((resolve) => window.once('show', () => resolve(compute())));
   }
 
   private resolveDisplay(displayId?: string): Electron.Display {
@@ -167,8 +163,6 @@ export class AnnotationOverlayService {
 
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
       window.loadURL(`${process.env['ELECTRON_RENDERER_URL']}#${OVERLAY_HASH_ROUTE}`);
-      // TEMP: this window is non-focusable, so its devtools/console must be opened programmatically.
-      window.webContents.openDevTools({ mode: 'detach' });
     } else {
       window.loadFile(join(__dirname, '../renderer/index.html'), { hash: OVERLAY_HASH_ROUTE });
     }

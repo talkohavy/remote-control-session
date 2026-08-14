@@ -29,8 +29,8 @@ export const ApiEvents = {
   AnnotationStrokePoint: 'annotation:strokePoint',
   AnnotationStrokeEnd: 'annotation:strokeEnd',
   AnnotationClear: 'annotation:clear',
-  /** Main -> overlay window (push): corrects for the overlay window being clamped below the menu bar. */
-  AnnotationDisplayOffset: 'annotation:displayOffset',
+  /** Overlay window -> main (request/response): corrects for the window being clamped below the menu bar. */
+  AnnotationGetDisplayOffset: 'annotation:getDisplayOffset',
 } as const;
 
 export type ApiEventValues = (typeof ApiEvents)[keyof typeof ApiEvents];

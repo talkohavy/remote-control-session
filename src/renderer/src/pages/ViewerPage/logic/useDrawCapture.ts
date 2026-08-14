@@ -4,9 +4,6 @@ import type { DrawStyle, NormalizedPoint } from '@root/common/types';
 
 type Pixel = { x: number; y: number };
 
-/** TEMP diagnostic flag: disables the local instant-preview paint so only the video's own baked-in ink is visible. */
-const DEBUG_DISABLE_LOCAL_PREVIEW = true;
-
 type UseDrawCaptureArgs = {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -102,8 +99,6 @@ export function useDrawCapture(args: UseDrawCaptureArgs) {
 
   const paintDot = useCallback(
     (pixel: Pixel): void => {
-      if (DEBUG_DISABLE_LOCAL_PREVIEW) return;
-
       const ctx = canvasRef.current?.getContext('2d');
 
       if (!ctx) return;
@@ -118,8 +113,6 @@ export function useDrawCapture(args: UseDrawCaptureArgs) {
 
   const paintSegment = useCallback(
     (from: Pixel, to: Pixel): void => {
-      if (DEBUG_DISABLE_LOCAL_PREVIEW) return;
-
       const ctx = canvasRef.current?.getContext('2d');
 
       if (!ctx) return;
@@ -159,16 +152,6 @@ export function useDrawCapture(args: UseDrawCaptureArgs) {
 
       activeStrokeId.current = strokeId;
       lastPixel.current = pixel;
-
-      // eslint-disable-next-line no-console
-      console.log('[viewer] onMouseDown', {
-        videoRect: videoRef.current?.getBoundingClientRect(),
-        videoIntrinsic: videoRef.current
-          ? { videoWidth: videoRef.current.videoWidth, videoHeight: videoRef.current.videoHeight }
-          : null,
-        normalized: point,
-        localPixel: pixel,
-      });
 
       paintDot(pixel);
       onDrawStart(strokeId, point, { color, width });

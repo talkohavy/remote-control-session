@@ -45,6 +45,6 @@ export class AnnotationApi {
   onClear = (listener: (payload: undefined) => void): (() => void) =>
     this.#ipc.subscribe(ApiEvents.AnnotationClear, listener);
 
-  onDisplayOffset = (listener: (offset: DisplayOffset) => void): (() => void) =>
-    this.#ipc.subscribe(ApiEvents.AnnotationDisplayOffset, listener);
+  /** Pulled once on the overlay page's own mount - see `AnnotationOverlayService.getDisplayOffset`. */
+  getDisplayOffset = (): Promise<DisplayOffset> => this.#ipc.invoke(ApiEvents.AnnotationGetDisplayOffset);
 }

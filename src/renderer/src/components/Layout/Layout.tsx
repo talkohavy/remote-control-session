@@ -2,7 +2,6 @@ import type { PropsWithChildren } from 'react';
 import { Toaster } from 'sonner';
 import Header from './Header';
 import Main from './Main';
-import Sidebar from './Sidebar';
 
 type LayoutProps = PropsWithChildren;
 
@@ -14,8 +13,6 @@ export default function Layout(props: LayoutProps) {
       <Header />
 
       <div className='flex size-full items-center justify-start overflow-auto'>
-        <Sidebar />
-
         <Main>{children}</Main>
       </div>
 

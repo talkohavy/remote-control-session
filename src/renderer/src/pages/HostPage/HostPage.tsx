@@ -27,9 +27,9 @@ export default function HostPage() {
   const canInject = !permissions?.injectionUnavailableReason;
 
   return (
-    <div className='mx-auto flex w-full max-w-3xl flex-col gap-5 p-6 md:p-8'>
-      <div>
-        <h1 className='text-xl font-extrabold text-gray-900 dark:text-white'>Share my screen</h1>
+    <div className='flex justify-center items-center w-full flex-col gap-10 p-6 md:p-8'>
+      <div className='flex flex-col items-center justify-center gap-2'>
+        <h1 className='text-xl text-center font-extrabold text-gray-900 dark:text-white'>Share my screen</h1>
 
         <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
           This desktop becomes the host. Viewers watch first and can only take over once you allow it.
@@ -75,7 +75,7 @@ export default function HostPage() {
           </Panel>
         </>
       ) : (
-        <Panel title='Choose what to share' subtitle='Pick a screen or a single window.'>
+        <Panel title='Choose what to share' subtitle='Pick a screen or a single window.' className='w-full max-w-3xl'>
           <SourcePicker sources={sources} selectedSourceId={selectedSourceId} onSelect={setSelectedSourceId} />
 
           <div>

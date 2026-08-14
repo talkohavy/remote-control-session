@@ -1,0 +1,99 @@
+.selectTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1;
+  gap: 10px;
+  padding: 0 10px;
+  cursor: pointer;
+  background-color: var(--select-trigger-bg-color, white);
+  color: var(--select-trigger-text-color, rgb(22, 22, 22));
+  height: 35px;
+  border: 1px solid var(--select-trigger-border-color, black);
+}
+
+// This is to win against: `body[dir='rtl'] * { direction: rtl; }`
+button[dir='ltr'].selectTrigger {
+  direction: ltr;
+}
+
+.selectTrigger:hover {
+  background-color: var(--select-trigger-bg-color-hover, #eaeaea);
+}
+
+.selectTrigger:focus-visible {
+  outline: none;
+  border: 1px solid var(--select-border-color-focus, rgb(53, 93, 255));
+  box-shadow: 0 0 0 1px var(--select-border-color-focus, rgb(53, 93, 255));
+}
+
+.selectTrigger span[data-placeholder] {
+  color: var(--select-trigger-placeholder-color, #7f7f7f);
+}
+
+.selectIcon {
+  color: var(--select-arrow-color, black);
+}
+
+body[class*='dark'] .selectTrigger {
+  background-color: var(--select-trigger-bg-color, #191918);
+  color: var(--select-trigger-text-color, rgb(230, 230, 230));
+  border-color: var(--select-trigger-border-color, white);
+}
+
+body[class*='dark'] .selectTrigger:hover {
+  background-color: var(--select-trigger-bg-color-hover, #2d2d2c);
+}
+
+body[class*='dark'] .selectTrigger span[data-placeholder] {
+  color: var(--select-trigger-placeholder-color, #8f8f8f);
+}
+
+body[class*='dark'] .selectIcon {
+  color: var(--select-arrow-color, white);
+}
+
+.selectContent {
+  overflow: hidden;
+  border-radius: var(--select-content-radius, 6px);
+  box-shadow:
+    0px 10px 38px -10px rgba(22, 23, 24, 0.35),
+    0px 10px 20px -15px rgba(22, 23, 24, 0.2);
+  background-color: var(--select-content-bg-color, white);
+}
+
+body[class*='dark'] .selectContent {
+  background-color: var(--select-content-bg-color, #191918);
+  border: 1px solid #2d2d2c;
+}
+
+.selectViewport {
+  padding: 5px;
+  max-height: 400px;
+}
+
+.selectScrollButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  background-color: var(--select-scroll-button-bg-color, white);
+  color: var(--select-scroll-button-color, rosybrown);
+  cursor: default;
+}
+
+body[class*='dark'] .selectScrollButton {
+  background-color: var(--select-scroll-button-bg-color, #191918);
+}
+
+.dropdownMenuArrow {
+  fill: white;
+  height: 5px;
+  width: 10px;
+}
+
+body[class*='dark'] .dropdownMenuArrow {
+  fill: #191918;
+}

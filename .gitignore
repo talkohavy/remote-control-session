@@ -1,0 +1,11 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+
+# Holds the TURN relay credentials. .env.example is the tracked template.
+.env
+.env.*
+!.env.example

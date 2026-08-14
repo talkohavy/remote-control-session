@@ -1,0 +1,53 @@
+appId: com.remotecontrolsession.app
+productName: Remote Control Session
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - src/resources/**
+  # `bindings` resolves the prebuilt .node by real filesystem path, which cannot be read
+  # from inside an asar archive. These have to sit on disk unpacked.
+  - '**/node_modules/@nut-tree-fork/**'
+win:
+  executableName: remote-control-session
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  entitlementsInherit: build/entitlements.mac.plist
+  # CGEventPost (the input-injection path) and AXIsProcessTrusted are both blocked by the
+  # hardened runtime, so it stays off. Enabling it silently breaks remote control.
+  hardenedRuntime: false
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  notarize: false
+dmg:
+  artifactName: ${name}-${version}.${ext}
+linux:
+  target:
+    - AppImage
+    - snap
+    - deb
+  maintainer: electronjs.org
+  category: Utility
+appImage:
+  artifactName: ${name}-${version}.${ext}
+# The libnut binaries are prebuilt N-API modules: ABI-stable across Node and Electron,
+# so there is nothing to rebuild against Electron's headers.
+npmRebuild: false
+publish:
+  provider: generic
+  url: https://example.com/auto-updates
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/

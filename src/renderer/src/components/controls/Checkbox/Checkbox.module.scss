@@ -1,0 +1,43 @@
+.checkboxHolder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 24px;
+  width: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.checkboxHolder:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+input:focus-visible ~ .checkboxHolder {
+  box-shadow: 0 0 1px 2px rgba(68, 127, 255, 0.776);
+}
+
+body[class*='dark'] input:focus-visible ~ .checkboxHolder {
+  box-shadow: 0 0 1px 2px rgba(241, 241, 241, 0.877);
+}
+
+body[class*='dark'] .checkboxHolder {
+  border-color: white;
+}
+
+div:has(input:checked) > .checkboxHolder {
+  background-color: #007bff;
+  transition: all;
+  transition-duration: 200ms;
+}
+
+.checkboxCheckMark {
+  fill: white;
+  opacity: 0;
+}
+
+div:has(input:checked) > .checkboxHolder > .checkboxCheckMark {
+  opacity: 1;
+  transition: all;
+  transition-duration: 200ms;
+}

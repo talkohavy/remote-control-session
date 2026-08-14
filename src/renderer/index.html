@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Electron</title>
+    <!--
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+
+      connect-src has to allow arbitrary ws:/wss: origins: signalling runs over a WebSocket to
+      a broker whose host is chosen at runtime (VITE_PEER_HOST, or the PeerJS cloud), and a
+      self-hosted broker is plain ws: unless configured otherwise. Under `default-src 'self'`
+      alone that socket is blocked and no session can ever be established.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https: wss: ws:"
+    />
+  </head>
+
+  <body>
+    <div id="title-bar"></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

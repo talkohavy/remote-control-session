@@ -1,0 +1,35 @@
+.checkboxLabel {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: var(--checkbox-label-flex-direction, row);
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxInputAndFakeCheckMark {
+  // do NOT remove the position: relative! Without it, you'll see a double scrollbar (e.g. on RegisterModal).
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkboxInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -1,0 +1,50 @@
+.selectItem {
+  font-size: 13px;
+  line-height: 1;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  height: 25px;
+  padding: 0 35px 0 25px;
+  position: relative;
+  user-select: none;
+  color: black;
+}
+
+html[data-theme='dark'] .selectItem {
+  color: white;
+}
+
+.selectItem[data-disabled] {
+  color: #323232;
+  pointer-events: none;
+}
+
+html[data-theme='dark'] .selectItem[data-disabled] {
+  color: #606060;
+}
+
+.selectItem[data-highlighted] {
+  outline: none;
+  background-color: rgb(130, 188, 238);
+  color: white;
+  cursor: pointer;
+}
+
+html[data-theme='dark'] .selectItem[data-highlighted] {
+  background-color: #2d2d2c;
+}
+
+.selectItemIndicator {
+  position: absolute;
+  left: 0;
+  width: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selectItemIndicator > svg {
+  width: 12px;
+  height: 12px;
+}

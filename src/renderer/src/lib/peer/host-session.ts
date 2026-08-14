@@ -2,7 +2,14 @@ import { PeerChannels, RemoteProtocol } from '@root/common/constants';
 import Peer, { type DataConnection, type MediaConnection } from 'peerjs';
 import { buildPeerOptions } from './logic/peer-options';
 import { generateSessionCode, generateSessionPin, toPeerId } from './logic/session-code';
-import type { ControlMessage, ConnectedViewer, RemoteInputEvent } from '@root/common/types';
+import type {
+  AnnotationStrokeEndPayload,
+  AnnotationStrokePointPayload,
+  AnnotationStrokeStartPayload,
+  ConnectedViewer,
+  ControlMessage,
+  RemoteInputEvent,
+} from '@root/common/types';
 
 /**
  * A 6-digit PIN is 1,000,000 combinations - trivially brute-forceable over an automated
@@ -15,6 +22,10 @@ type HostSessionCallbacks = {
   onReady: (sessionCode: string, pin: string) => void;
   onViewersChanged: (viewers: ConnectedViewer[]) => void;
   onInput: (event: RemoteInputEvent) => void;
+  onDrawStart: (payload: AnnotationStrokeStartPayload) => void;
+  onDrawPoint: (payload: AnnotationStrokePointPayload) => void;
+  onDrawEnd: (payload: AnnotationStrokeEndPayload) => void;
+  onDrawClear: () => void;
   onError: (message: string) => void;
 };
 
@@ -41,12 +52,15 @@ export class HostSession {
   private sessionCode = '';
   private pin = '';
   private controlAllowed = false;
+  private captureKind: 'screen' | 'window' = 'screen';
   private readonly viewers = new Map<string, ViewerState>();
 
   constructor(private readonly callbacks: HostSessionCallbacks) {}
 
-  start(): void {
+  /** `captureKind` travels to every viewer in `Granted`, gating their draw tool. */
+  start(captureKind: 'screen' | 'window' = 'screen'): void {
     this.pin = generateSessionPin();
+    this.captureKind = captureKind;
     this.openPeer();
   }
 
@@ -69,6 +83,20 @@ export class HostSession {
     this.controlAllowed = isAllowed;
 
     const message: ControlMessage = { type: RemoteProtocol.ControlState, controlAllowed: isAllowed };
+
+    for (const viewer of this.viewers.values()) {
+      if (viewer.authenticated) viewer.control?.send(message);
+    }
+  }
+
+  /**
+   * Tells every connected viewer to wipe their own local preview canvas. Needed both when
+   * the host clicks "Clear annotations" directly (which otherwise only clears the overlay,
+   * leaving each viewer's optimistic local copy on screen) and when one viewer's clear
+   * should also wipe any other connected viewer's local copy.
+   */
+  broadcastDrawClear(): void {
+    const message: ControlMessage = { type: RemoteProtocol.DrawClear };
 
     for (const viewer of this.viewers.values()) {
       if (viewer.authenticated) viewer.control?.send(message);
@@ -145,6 +173,42 @@ export class HostSession {
       return;
     }
 
+    /**
+     * Annotation strokes reuse the same consent gate as input: they don't touch the OS,
+     * but the user only opted into a viewer touching anything at all via "remote control".
+     */
+    if (message?.type === RemoteProtocol.DrawStart) {
+      if (!viewer.authenticated || !this.controlAllowed) return;
+
+      const { strokeId, style, x, y } = message;
+
+      this.callbacks.onDrawStart({ strokeId, style, x, y });
+      return;
+    }
+
+    if (message?.type === RemoteProtocol.DrawPoint) {
+      if (!viewer.authenticated || !this.controlAllowed) return;
+
+      const { strokeId, x, y } = message;
+
+      this.callbacks.onDrawPoint({ strokeId, x, y });
+      return;
+    }
+
+    if (message?.type === RemoteProtocol.DrawEnd) {
+      if (!viewer.authenticated || !this.controlAllowed) return;
+
+      this.callbacks.onDrawEnd({ strokeId: message.strokeId });
+      return;
+    }
+
+    if (message?.type === RemoteProtocol.DrawClear) {
+      if (!viewer.authenticated || !this.controlAllowed) return;
+
+      this.callbacks.onDrawClear();
+      return;
+    }
+
     if (message?.type === RemoteProtocol.Bye) {
       this.dropViewer(viewer.peerId);
     }
@@ -177,6 +241,7 @@ export class HostSession {
       type: RemoteProtocol.Granted,
       hostName: 'Host',
       controlAllowed: this.controlAllowed,
+      captureKind: this.captureKind,
     } satisfies ControlMessage);
 
     if (this.stream) this.callViewer(viewer);

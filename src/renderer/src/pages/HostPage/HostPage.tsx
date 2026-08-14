@@ -23,9 +23,11 @@ export default function HostPage() {
     requestPermissions,
     startSharing,
     stopSharing,
+    clearAnnotations,
   } = useHostPageLogic();
 
   const canInject = !permissions?.injectionUnavailableReason;
+  const sharingKind = sources.find((source) => source.id === selectedSourceId)?.kind ?? 'screen';
 
   return (
     <div className='flex justify-center items-center w-full flex-col gap-10 p-6 md:p-8'>
@@ -72,6 +74,14 @@ export default function HostPage() {
               </p>
             )}
           </Panel>
+
+          {controlAllowed && sharingKind === 'screen' && (
+            <Panel
+              title='Live annotations'
+              subtitle='A viewer with control can draw on your screen. Strokes stay until cleared.'
+              action={<Button onClick={clearAnnotations}>Clear annotations</Button>}
+            />
+          )}
 
           <Panel title='Connected viewers'>
             <ViewerList viewers={viewers} />

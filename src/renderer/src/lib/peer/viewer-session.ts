@@ -2,15 +2,17 @@ import { PeerChannels, RemoteProtocol } from '@root/common/constants';
 import Peer, { type DataConnection } from 'peerjs';
 import { buildPeerOptions } from './logic/peer-options';
 import { toPeerId } from './logic/session-code';
-import type { ControlMessage, RemoteInputEvent } from '@root/common/types';
+import type { ControlMessage, DrawStyle, NormalizedPoint, RemoteInputEvent } from '@root/common/types';
 
 type ViewerSessionCallbacks = {
   onStream: (stream: MediaStream) => void;
-  onGranted: (controlAllowed: boolean) => void;
+  onGranted: (controlAllowed: boolean, captureKind: 'screen' | 'window') => void;
   onControlStateChanged: (controlAllowed: boolean) => void;
   onRejected: (reason: string) => void;
   onClosed: () => void;
   onError: (message: string) => void;
+  /** The host cleared annotations (either its own button or another viewer's Clear) - wipe our local preview too. */
+  onHostClear: () => void;
 };
 
 /**
@@ -115,6 +117,27 @@ export class ViewerSession {
     this.control?.send(message);
   }
 
+  /**
+   * Annotation strokes all travel on the reliable, ordered channel - unlike cursor
+   * movement, a dropped or reordered point leaves a visible kink or gap in the line,
+   * which is worse here than the extra latency reliability costs.
+   */
+  sendDrawStart(strokeId: string, point: NormalizedPoint, style: DrawStyle): void {
+    this.control?.send({ type: RemoteProtocol.DrawStart, strokeId, style, ...point } satisfies ControlMessage);
+  }
+
+  sendDrawPoint(strokeId: string, point: NormalizedPoint): void {
+    this.control?.send({ type: RemoteProtocol.DrawPoint, strokeId, ...point } satisfies ControlMessage);
+  }
+
+  sendDrawEnd(strokeId: string): void {
+    this.control?.send({ type: RemoteProtocol.DrawEnd, strokeId } satisfies ControlMessage);
+  }
+
+  sendDrawClear(): void {
+    this.control?.send({ type: RemoteProtocol.DrawClear } satisfies ControlMessage);
+  }
+
   disconnect(): void {
     this.clearTimeout();
 
@@ -165,7 +188,7 @@ export class ViewerSession {
       case RemoteProtocol.Granted:
         this.answered = true;
         this.clearTimeout();
-        this.callbacks.onGranted(message.controlAllowed);
+        this.callbacks.onGranted(message.controlAllowed, message.captureKind);
         break;
 
       case RemoteProtocol.Rejected:
@@ -180,6 +203,10 @@ export class ViewerSession {
 
       case RemoteProtocol.Bye:
         this.callbacks.onClosed();
+        break;
+
+      case RemoteProtocol.DrawClear:
+        this.callbacks.onHostClear();
         break;
 
       default:

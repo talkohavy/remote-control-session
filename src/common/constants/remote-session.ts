@@ -17,6 +17,15 @@ export const RemoteProtocol = {
   ControlState: 'controlState',
   Input: 'input',
   Bye: 'bye',
+  /**
+   * Live annotation strokes. Kept on the reliable channel (see `PeerChannels.Control`):
+   * a dropped or reordered point leaves a visible kink or gap in a line, which is worse
+   * here than the extra latency that reliability costs.
+   */
+  DrawStart: 'drawStart',
+  DrawPoint: 'drawPoint',
+  DrawEnd: 'drawEnd',
+  DrawClear: 'drawClear',
 } as const;
 
 export const SESSION_PIN_LENGTH = 6;

@@ -18,6 +18,19 @@ export const ApiEvents = {
   RemoteSetControlAllowed: 'remote:setControlAllowed',
   RemoteInput: 'remote:input',
   RemoteReleaseAll: 'remote:releaseAll',
+
+  // Live annotation overlay (host side)
+  /** Host -> main: which physical display to overlay, sent once when sharing starts. */
+  AnnotationSetActiveDisplay: 'annotation:setActiveDisplay',
+  /** Host -> main: sharing stopped, hide the overlay. */
+  AnnotationClearActiveDisplay: 'annotation:clearActiveDisplay',
+  /** Host -> main (hot path) -> overlay window (push). */
+  AnnotationStrokeStart: 'annotation:strokeStart',
+  AnnotationStrokePoint: 'annotation:strokePoint',
+  AnnotationStrokeEnd: 'annotation:strokeEnd',
+  AnnotationClear: 'annotation:clear',
+  /** Main -> overlay window (push): corrects for the overlay window being clamped below the menu bar. */
+  AnnotationDisplayOffset: 'annotation:displayOffset',
 } as const;
 
 export type ApiEventValues = (typeof ApiEvents)[keyof typeof ApiEvents];

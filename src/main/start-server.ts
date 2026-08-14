@@ -5,6 +5,7 @@ import { attachAppEvents } from './core/attach-app-events';
 import { createWindow } from './core/create-window';
 import { IpcBridgeService } from './core/ipc-bridge';
 import { registerGlobalShortcuts } from './core/register-global-shortcuts';
+import { initAnnotationOverlayModule } from './modules/annotation-overlay';
 import { initMenuModule } from './modules/menu';
 import { initRemoteInputModule } from './modules/remote-input';
 import { initScreenCaptureModule } from './modules/screen-capture';
@@ -38,10 +39,11 @@ function handleAppIsReady(): void {
    */
   initScreenCaptureModule(ipcBridgeService);
   initRemoteInputModule(ipcBridgeService);
+  const annotationOverlayService = initAnnotationOverlayModule(ipcBridgeService);
 
   attachAppEvents(app);
 
-  registerGlobalShortcuts();
+  registerGlobalShortcuts({ onPanic: () => annotationOverlayService.destroy() });
 
   createWindow();
 }

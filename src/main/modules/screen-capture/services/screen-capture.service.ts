@@ -63,12 +63,18 @@ export class ScreenCaptureService {
       thumbnailSize: THUMBNAIL_SIZE,
     });
 
-    return sources.map((source) => ({
-      id: source.id,
-      name: source.name,
-      thumbnailDataUrl: source.thumbnail.isEmpty() ? null : source.thumbnail.toDataURL(),
-      kind: source.id.startsWith('screen:') ? 'screen' : 'window',
-    }));
+    return sources.map((source) => {
+      const kind: CaptureSource['kind'] = source.id.startsWith('screen:') ? 'screen' : 'window';
+
+      return {
+        id: source.id,
+        name: source.name,
+        thumbnailDataUrl: source.thumbnail.isEmpty() ? null : source.thumbnail.toDataURL(),
+        kind,
+        // Only meaningful for screens - lets the annotation overlay target the right display.
+        ...(kind === 'screen' && source.display_id ? { displayId: source.display_id } : {}),
+      };
+    });
   }
 
   selectSource(sourceId: string): void {

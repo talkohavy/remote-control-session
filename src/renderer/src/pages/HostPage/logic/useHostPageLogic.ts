@@ -39,6 +39,7 @@ export function useHostPageLogic() {
      */
     ipcClient.remote.setControlAllowed(false);
     ipcClient.remote.releaseAll();
+    ipcClient.annotation.clearActiveDisplay();
 
     setIsSharing(false);
     setControlAllowed(false);
@@ -49,6 +50,16 @@ export function useHostPageLogic() {
 
   // Closing the window mid-session must not leave input stuck down either.
   useEffect(() => stopSharing, [stopSharing]);
+
+  /**
+   * Clears the real overlay and tells every connected viewer to wipe their own local
+   * preview canvas too - otherwise a viewer's optimistic copy of a stroke never disappears
+   * when the clear was triggered from the host side (or by a different viewer).
+   */
+  const clearAnnotations = useCallback(() => {
+    ipcClient.annotation.clear();
+    sessionRef.current?.broadcastDrawClear();
+  }, []);
 
   const startSharing = useCallback(async () => {
     try {
@@ -69,12 +80,22 @@ export function useHostPageLogic() {
         },
         onViewersChanged: setViewers,
         onInput: (event) => ipcClient.remote.sendInput(event),
+        onDrawStart: (payload) => ipcClient.annotation.strokeStart(payload),
+        onDrawPoint: (payload) => ipcClient.annotation.strokePoint(payload),
+        onDrawEnd: (payload) => ipcClient.annotation.strokeEnd(payload),
+        onDrawClear: clearAnnotations,
         onError: (message) => showErrorToast({ title: message }),
       });
 
+      const selectedSource = sources.find((source) => source.id === selectedSourceId);
+      const captureKind = selectedSource?.kind ?? 'screen';
+
       sessionRef.current = session;
-      session.start();
+      session.start(captureKind);
       session.setStream(stream);
+
+      // Only a full-screen share can host a real on-desktop overlay - see the plan notes.
+      if (captureKind === 'screen') ipcClient.annotation.setActiveDisplay(selectedSource?.displayId);
 
       // The user stopping the share from the OS overlay has to tear the session down too.
       stream.getVideoTracks()[0]?.addEventListener('ended', () => {
@@ -86,7 +107,7 @@ export function useHostPageLogic() {
     } catch (error) {
       showErrorToast({ title: error instanceof Error ? error.message : 'Could not start screen capture.' });
     }
-  }, [selectedSourceId, stopSharing]);
+  }, [selectedSourceId, stopSharing, clearAnnotations]);
 
   const toggleControl = useCallback((isAllowed: boolean) => {
     setControlAllowed(isAllowed);
@@ -112,5 +133,6 @@ export function useHostPageLogic() {
     requestPermissions,
     startSharing,
     stopSharing,
+    clearAnnotations,
   };
 }

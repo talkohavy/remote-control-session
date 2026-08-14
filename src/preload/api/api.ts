@@ -1,3 +1,4 @@
+import { AnnotationApi } from './features/annotation.api';
 import { CaptureApi } from './features/capture.api';
 import { MenuApi } from './features/menu.api';
 import { RemoteApi } from './features/remote.api';
@@ -24,11 +25,13 @@ export class Api {
   readonly menu: MenuApi;
   readonly capture: CaptureApi;
   readonly remote: RemoteApi;
+  readonly annotation: AnnotationApi;
 
   constructor(ipc: IpcService) {
     this.system = new SystemApi(ipc);
     this.menu = new MenuApi(ipc);
     this.capture = new CaptureApi(ipc);
     this.remote = new RemoteApi(ipc);
+    this.annotation = new AnnotationApi(ipc);
   }
 }

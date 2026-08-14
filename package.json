@@ -18,7 +18,7 @@
     "tsc:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "tsc:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "start": "electron-vite preview",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "electron-builder install-app-deps && node node_modules/electron/install.js",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",

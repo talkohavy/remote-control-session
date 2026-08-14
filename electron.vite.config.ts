@@ -36,9 +36,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     preload: {
-      server: {
-        port: Number(env.VITE_PORT),
-      },
       build: {
         rollupOptions: {
           /**
@@ -55,6 +52,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     renderer: {
+      server: {
+        port: Number(env.VITE_PORT ?? 7000),
+      },
       /**
        * root defaults to src/renderer.
        */

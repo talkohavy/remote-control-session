@@ -46,9 +46,11 @@ export function createWindow(): BrowserWindow {
   });
 
   // Open the DevTools on app start:
-  window.webContents.openDevTools({
-    mode: 'right', // <--- defaults to 'right'
-  });
+  if (process.env.SHOW_DEV_TOOLS) {
+    window.webContents.openDevTools({
+      mode: 'right', // <--- defaults to 'right'
+    });
+  }
 
   // HMR for the renderer in dev; the built file in production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

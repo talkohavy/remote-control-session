@@ -9,10 +9,9 @@ export default function Sidebar() {
   return (
     <nav
       className={clsx(
-        'relative flex h-full shrink-0 flex-col items-start justify-start bg-amber-50 shadow-md transition-all duration-300 dark:bg-slate-500',
+        'relative flex h-full shrink-0 flex-col items-start justify-start border-r border-gray-200 bg-white shadow-md transition-all duration-300 dark:border-slate-700 dark:bg-slate-800',
         isSidebarOpen ? 'w-72' : 'w-10',
       )}
-      // style={{ backgroundColor: 'red' }}
     >
       <div className='size-full p-4 overflow-auto'>
         <button

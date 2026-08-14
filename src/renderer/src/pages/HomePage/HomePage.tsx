@@ -19,7 +19,7 @@ const ROLES = [
 
 export default function HomePage() {
   return (
-    <div className='mx-auto flex w-full max-w-3xl flex-col items-center gap-8 p-6 md:p-8'>
+    <div className='flex w-full flex-col items-center gap-8 p-6 md:p-8'>
       <div className='text-center'>
         <h1 className='text-2xl font-extrabold text-gray-900 dark:text-white'>Remote Control Session</h1>
 
@@ -28,12 +28,12 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className='grid w-full grid-cols-1 gap-4 sm:grid-cols-2'>
+      <div className='flex items-center justify-center gap-10 w-full sm:grid-cols-2'>
         {ROLES.map(({ to, emoji, title, description }) => (
           <Link
             key={to}
             to={to}
-            className='group flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-400 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500'
+            className='group flex flex-col gap-2 max-w-xs rounded-xl border border-blue-100 bg-linear-to-tl from-white via-sky-50 to-blue-100 p-6 transition hover:border-slate-400 dark:border-slate-700 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 dark:hover:border-blue-500'
           >
             <span className='text-3xl'>{emoji}</span>
 

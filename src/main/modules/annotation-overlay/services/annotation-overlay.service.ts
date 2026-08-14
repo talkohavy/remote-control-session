@@ -39,6 +39,12 @@ export class AnnotationOverlayService {
     this.activeDisplayBounds = display.bounds;
     window.setBounds(display.bounds);
 
+    console.log('[main] setActiveDisplay', {
+      requestedDisplayId: displayId,
+      resolvedDisplay: { id: display.id, bounds: display.bounds, scaleFactor: display.scaleFactor },
+      windowBoundsAfterSet: window.getBounds(),
+    });
+
     if (window.isVisible()) {
       this.pushDisplayOffset(window);
       return;
@@ -108,7 +114,6 @@ export class AnnotationOverlayService {
       y: actual.y - this.activeDisplayBounds.y,
     };
 
-    // eslint-disable-next-line no-console
     console.log('[main] pushDisplayOffset', { actual, activeDisplayBounds: this.activeDisplayBounds, offset });
 
     this.bridge.emit(window, ApiEvents.AnnotationDisplayOffset, offset);

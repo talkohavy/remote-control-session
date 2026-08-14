@@ -14,6 +14,13 @@ type ViewerSessionCallbacks = {
 };
 
 /**
+ * How long to wait before declaring the attempt dead. Nothing in WebRTC reports "signalling
+ * succeeded but no peer-to-peer path exists" - the connection just never opens - so without
+ * a deadline the UI sits on "Connecting..." forever.
+ */
+const CONNECT_TIMEOUT_MS = 20_000;
+
+/**
  * The controlling end of a session.
  *
  * Opens both data channels, authenticates with the PIN, renders whatever track the host
@@ -25,14 +32,26 @@ export class ViewerSession {
   private control: DataConnection | null = null;
   private motion: DataConnection | null = null;
 
+  /**
+   * Which stage was reached, so a failure can name the thing that actually broke. The three
+   * stages fail for entirely different reasons and have entirely different fixes.
+   */
+  private reachedBroker = false;
+  private openedChannel = false;
+  private answered = false;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
+
   constructor(private readonly callbacks: ViewerSessionCallbacks) {}
 
   connect(sessionCode: string, pin: string, viewerName: string): void {
     const peer = new Peer(buildPeerOptions());
 
     this.peer = peer;
+    this.timeout = setTimeout(() => this.reportStalledConnection(), CONNECT_TIMEOUT_MS);
 
     peer.on('open', () => {
+      this.reachedBroker = true;
+
       const hostPeerId = toPeerId(sessionCode);
 
       /**
@@ -48,7 +67,16 @@ export class ViewerSession {
       this.motion = peer.connect(hostPeerId, { label: PeerChannels.Motion, reliable: false });
 
       this.control.on('open', () => {
+        this.openedChannel = true;
         this.control?.send({ type: RemoteProtocol.Hello, pin, viewerName } satisfies ControlMessage);
+      });
+
+      /**
+       * `failed` means ICE exhausted every candidate pair without finding a route. Waiting
+       * out the full timeout adds nothing once that has happened.
+       */
+      this.control.on('iceStateChanged', (state) => {
+        if (state === 'failed') this.reportStalledConnection();
       });
 
       this.control.on('data', (data) => this.handleControlMessage(data as ControlMessage));
@@ -88,6 +116,8 @@ export class ViewerSession {
   }
 
   disconnect(): void {
+    this.clearTimeout();
+
     this.control?.send({ type: RemoteProtocol.Bye } satisfies ControlMessage);
     this.control?.close();
     this.motion?.close();
@@ -98,13 +128,49 @@ export class ViewerSession {
     this.peer = null;
   }
 
+  private clearTimeout(): void {
+    if (this.timeout) clearTimeout(this.timeout);
+
+    this.timeout = null;
+  }
+
+  /**
+   * Names the stage that was never reached. Each one has a different cause, and the
+   * distinction is invisible from the UI otherwise - all three look like "Connecting...".
+   */
+  private reportStalledConnection(): void {
+    if (this.answered) return;
+
+    this.clearTimeout();
+
+    if (!this.reachedBroker) {
+      this.callbacks.onError(
+        'Could not reach the signalling server. Check this machine\u2019s internet access, or a proxy blocking WebSocket connections.',
+      );
+      return;
+    }
+
+    if (!this.openedChannel) {
+      this.callbacks.onError(
+        'Found the host, but could not open a direct connection to it. Both machines are behind a NAT that blocks peer-to-peer traffic - common on corporate and mobile networks, even on the same Wi-Fi. This needs a TURN relay: set VITE_TURN_URLS.',
+      );
+      return;
+    }
+
+    this.callbacks.onError('Connected to the host, but it never answered the handshake.');
+  }
+
   private handleControlMessage(message: ControlMessage): void {
     switch (message?.type) {
       case RemoteProtocol.Granted:
+        this.answered = true;
+        this.clearTimeout();
         this.callbacks.onGranted(message.controlAllowed);
         break;
 
       case RemoteProtocol.Rejected:
+        this.answered = true;
+        this.clearTimeout();
         this.callbacks.onRejected(message.reason);
         break;
 

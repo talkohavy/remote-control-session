@@ -19,11 +19,20 @@ export function buildPeerOptions(): PeerOptions {
     .map((url) => url.trim())
     .filter(Boolean);
 
-  if (turnUrls?.length) {
+  const turnUsername = import.meta.env.VITE_TURN_USERNAME?.trim();
+  const turnCredential = import.meta.env.VITE_TURN_CREDENTIAL?.trim();
+
+  /**
+   * All three or nothing. Chromium refuses to construct an RTCPeerConnection at all when a
+   * `turn:` URL arrives without credentials - it throws InvalidAccessError - so a partly
+   * filled .env would break every connection on every network, rather than just leaving the
+   * relay unavailable. Falling back to STUN-only is always the better failure.
+   */
+  if (turnUrls?.length && turnUsername && turnCredential) {
     iceServers.push({
       urls: turnUrls,
-      username: import.meta.env.VITE_TURN_USERNAME,
-      credential: import.meta.env.VITE_TURN_CREDENTIAL,
+      username: turnUsername,
+      credential: turnCredential,
     });
   }
 

@@ -105,6 +105,7 @@ export function useHostPageLogic() {
 
       setIsSharing(true);
     } catch (error) {
+      console.error(error);
       showErrorToast({ title: error instanceof Error ? error.message : 'Could not start screen capture.' });
     }
   }, [selectedSourceId, stopSharing, clearAnnotations]);

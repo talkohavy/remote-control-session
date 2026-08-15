@@ -1,43 +1,12 @@
 import { PeerChannels, RemoteProtocol } from '@root/common/constants';
-import Peer, { type DataConnection, type MediaConnection } from 'peerjs';
-import { buildPeerOptions } from './logic/peer-options';
-import { generateSessionCode, generateSessionPin, toPeerId } from './logic/session-code';
-import type {
-  AnnotationStrokeEndPayload,
-  AnnotationStrokePointPayload,
-  AnnotationStrokeStartPayload,
-  ConnectedViewer,
-  ControlMessage,
-  RemoteInputEvent,
-} from '@root/common/types';
-
-/**
- * A 6-digit PIN is 1,000,000 combinations - trivially brute-forceable over an automated
- * connection if attempts are unlimited. Each viewer gets a small budget and is dropped
- * when it runs out.
- */
-const MAX_PIN_ATTEMPTS = 5;
-
-type HostSessionCallbacks = {
-  onReady: (sessionCode: string, pin: string) => void;
-  onViewersChanged: (viewers: ConnectedViewer[]) => void;
-  onInput: (event: RemoteInputEvent) => void;
-  onDrawStart: (payload: AnnotationStrokeStartPayload) => void;
-  onDrawPoint: (payload: AnnotationStrokePointPayload) => void;
-  onDrawEnd: (payload: AnnotationStrokeEndPayload) => void;
-  onDrawClear: () => void;
-  onError: (message: string) => void;
-};
-
-type ViewerState = {
-  peerId: string;
-  viewerName: string;
-  authenticated: boolean;
-  pinAttempts: number;
-  control: DataConnection | null;
-  motion: DataConnection | null;
-  media: MediaConnection | null;
-};
+import Peer, { type DataConnection } from 'peerjs';
+import { MAX_PIN_ATTEMPTS } from './logic/constants';
+import { generateSessionCode } from './logic/utils/generateSessionCode';
+import { generateSessionPin } from './logic/utils/generateSessionPin';
+import { buildPeerOptions } from './logic/utils/peer-options';
+import { toPeerId } from './logic/utils/toPeerId';
+import type { ControlMessage } from '@root/common/types';
+import type { HostSessionCallbacks, ViewerState } from './types';
 
 export class HostSession {
   private peer: Peer | null = null;
@@ -157,7 +126,7 @@ export class HostSession {
     /**
      * Input is only honoured from a viewer that passed the PIN and while the local user has
      * control switched on. The main process enforces the same gate; this is the cheap first
-     * line so unauthorised events never even cross the IPC boundary.
+     * line so unauthorized events never even cross the IPC boundary.
      */
     if (message?.type === RemoteProtocol.Input) {
       if (!viewer.authenticated || !this.controlAllowed) return;

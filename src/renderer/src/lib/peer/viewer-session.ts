@@ -1,26 +1,10 @@
 import { PeerChannels, RemoteProtocol } from '@root/common/constants';
 import Peer, { type DataConnection } from 'peerjs';
-import { buildPeerOptions } from './logic/peer-options';
-import { toPeerId } from './logic/session-code';
+import { CONNECT_TIMEOUT_MS } from './logic/constants';
+import { buildPeerOptions } from './logic/utils/peer-options';
+import { toPeerId } from './logic/utils/toPeerId';
 import type { ControlMessage, DrawStyle, NormalizedPoint, RemoteInputEvent } from '@root/common/types';
-
-type ViewerSessionCallbacks = {
-  onStream: (stream: MediaStream) => void;
-  onGranted: (controlAllowed: boolean, captureKind: 'screen' | 'window') => void;
-  onControlStateChanged: (controlAllowed: boolean) => void;
-  onRejected: (reason: string) => void;
-  onClosed: () => void;
-  onError: (message: string) => void;
-  /** The host cleared annotations (either its own button or another viewer's Clear) - wipe our local preview too. */
-  onHostClear: () => void;
-};
-
-/**
- * How long to wait before declaring the attempt dead. Nothing in WebRTC reports "signalling
- * succeeded but no peer-to-peer path exists" - the connection just never opens - so without
- * a deadline the UI sits on "Connecting..." forever.
- */
-const CONNECT_TIMEOUT_MS = 20_000;
+import type { ViewerSessionCallbacks } from './types';
 
 /**
  * The controlling end of a session.

@@ -1,3 +1,7 @@
+// main
 export { HostSession } from './host-session';
 export { ViewerSession } from './viewer-session';
-export { formatSessionCode, normalizeSessionCode } from './logic/session-code';
+
+// utils
+export { formatSessionCode } from './logic/utils/formatSessionCode';
+export { normalizeSessionCode } from './logic/utils/normalizeSessionCode';

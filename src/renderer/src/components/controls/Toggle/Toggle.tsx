@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import clsx from 'clsx';
 import styles from './Toggle.module.scss';
 
@@ -12,6 +13,13 @@ type ToggleProps = {
 export default function Toggle(props: ToggleProps) {
   const { isChecked, setIsChecked, disabled, label, className } = props;
 
+  const handleChange = useCallback(
+    (event: any) => {
+      setIsChecked(Boolean(event.target.checked));
+    },
+    [setIsChecked],
+  );
+
   return (
     <button type='button' role='switch' aria-checked={isChecked ? 'true' : 'false'}>
       <label className={clsx(styles.label, className)}>
@@ -19,7 +27,7 @@ export default function Toggle(props: ToggleProps) {
           <input
             type='checkbox'
             checked={isChecked}
-            onChange={setIsChecked}
+            onChange={handleChange}
             disabled={disabled}
             aria-hidden='true'
             tabIndex={-1}

@@ -67,12 +67,6 @@ export default function HostPage() {
               disabled={!canInject}
               label={isControlAllowed ? 'Viewers can control this machine' : 'View only'}
             />
-
-            {controlAllowed && (
-              <p className='text-xs font-medium text-red-600 dark:text-red-400'>
-                Your mouse and keyboard are being driven remotely. Toggle off to take back control.
-              </p>
-            )}
           </Panel>
 
           {isControlAllowed && sharingKind === 'screen' && (

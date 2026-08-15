@@ -3,13 +3,6 @@ import { THUMBNAIL_SIZE, WAYLAND_PLACEHOLDER_SOURCE } from '../logic/constants';
 import { isWayland } from '../logic/is-wayland';
 import type { CaptureSource } from '@root/common/types';
 
-/**
- * Owns which screen or window the host is sharing.
- *
- * The renderer never picks a source itself: `getDisplayMedia()` always asks the main
- * process, and the answer comes from `selectedSourceId` below. That keeps the choice in
- * one place and means the renderer needs no capture privileges of its own.
- */
 export class ScreenCaptureService {
   private selectedSourceId: string | null = null;
 

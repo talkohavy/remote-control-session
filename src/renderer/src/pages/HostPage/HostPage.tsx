@@ -16,7 +16,7 @@ export default function HostPage() {
     isSharing,
     sessionCode,
     pin,
-    controlAllowed,
+    isControlAllowed,
     toggleControl,
     viewers,
     permissions,
@@ -62,10 +62,10 @@ export default function HostPage() {
             }
           >
             <Toggle
-              isChecked={controlAllowed}
-              setIsChecked={(event) => toggleControl(Boolean(event?.target?.checked))}
+              isChecked={isControlAllowed}
+              setIsChecked={toggleControl}
               disabled={!canInject}
-              label={controlAllowed ? 'Viewers can control this machine' : 'View only'}
+              label={isControlAllowed ? 'Viewers can control this machine' : 'View only'}
             />
 
             {controlAllowed && (
@@ -75,7 +75,7 @@ export default function HostPage() {
             )}
           </Panel>
 
-          {controlAllowed && sharingKind === 'screen' && (
+          {isControlAllowed && sharingKind === 'screen' && (
             <Panel
               title='Live annotations'
               subtitle='A viewer with control can draw on your screen. Strokes stay until cleared.'

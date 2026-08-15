@@ -13,7 +13,7 @@ export function useHostPageLogic() {
   const [isSharing, setIsSharing] = useState(false);
   const [sessionCode, setSessionCode] = useState('');
   const [pin, setPin] = useState('');
-  const [controlAllowed, setControlAllowed] = useState(false);
+  const [isControlAllowed, setIsControlAllowed] = useState(true);
   const [viewers, setViewers] = useState<ConnectedViewer[]>([]);
   const [permissions, setPermissions] = useState<RemotePermissions | null>(null);
 
@@ -42,7 +42,7 @@ export function useHostPageLogic() {
     ipcClient.annotation.clearActiveDisplay();
 
     setIsSharing(false);
-    setControlAllowed(false);
+    setIsControlAllowed(false);
     setViewers([]);
     setSessionCode('');
     setPin('');
@@ -111,7 +111,7 @@ export function useHostPageLogic() {
   }, [selectedSourceId, stopSharing, clearAnnotations]);
 
   const toggleControl = useCallback((isAllowed: boolean) => {
-    setControlAllowed(isAllowed);
+    setIsControlAllowed(isAllowed);
     ipcClient.remote.setControlAllowed(isAllowed);
     sessionRef.current?.setControlAllowed(isAllowed);
   }, []);
@@ -127,7 +127,7 @@ export function useHostPageLogic() {
     isSharing,
     sessionCode,
     pin,
-    controlAllowed,
+    isControlAllowed,
     toggleControl,
     viewers,
     permissions,

@@ -48,9 +48,6 @@ export function useHostPageLogic() {
     setPin('');
   }, []);
 
-  // Closing the window mid-session must not leave input stuck down either.
-  useEffect(() => stopSharing, [stopSharing]);
-
   /**
    * Clears the real overlay and tells every connected viewer to wipe their own local
    * preview canvas too - otherwise a viewer's optimistic copy of a stroke never disappears

@@ -1,30 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { showErrorToast, showInfoToast } from '@renderer/common/utils/toast';
 import { ipcClient } from '@renderer/lib/ipc';
 import { HostSession } from '@renderer/lib/peer';
-import type { CaptureSource, ConnectedViewer, RemotePermissions } from '@root/common/types';
+import { useHostPageInit } from './hooks/useHostPageInit';
+import type { ConnectedViewer } from '@root/common/types';
 
 export function useHostPageLogic() {
   const sessionRef = useRef<HostSession | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const [sources, setSources] = useState<CaptureSource[]>([]);
-  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+  const { sources, selectedSourceId, setSelectedSourceId, permissions, setPermissions } = useHostPageInit();
   const [isSharing, setIsSharing] = useState(false);
   const [sessionCode, setSessionCode] = useState('');
   const [pin, setPin] = useState('');
   const [isControlAllowed, setIsControlAllowed] = useState(true);
   const [viewers, setViewers] = useState<ConnectedViewer[]>([]);
-  const [permissions, setPermissions] = useState<RemotePermissions | null>(null);
-
-  useEffect(() => {
-    ipcClient.remote.getPermissions().then(setPermissions);
-
-    ipcClient.capture.listSources().then((available) => {
-      setSources(available);
-      setSelectedSourceId((current) => current ?? available[0]?.id ?? null);
-    });
-  }, []);
 
   const stopSharing = useCallback(() => {
     streamRef.current?.getTracks().forEach((track) => track.stop());

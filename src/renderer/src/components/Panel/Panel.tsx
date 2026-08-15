@@ -8,7 +8,7 @@ type PanelProps = PropsWithChildren<{
   className?: string;
 }>;
 
-export default function Panel(props: PanelProps): React.JSX.Element {
+export default function Panel(props: PanelProps) {
   const { title, subtitle, action, className, children } = props;
 
   return (

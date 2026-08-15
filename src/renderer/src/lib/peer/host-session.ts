@@ -39,13 +39,6 @@ type ViewerState = {
   media: MediaConnection | null;
 };
 
-/**
- * The sharing end of a session.
- *
- * Holds the peer identity, authenticates arriving viewers, pushes the screen track to
- * them, and forwards their input upward - but only once the local user has granted
- * control. Everything WebRTC-shaped lives here so the page component stays declarative.
- */
 export class HostSession {
   private peer: Peer | null = null;
   private stream: MediaStream | null = null;
